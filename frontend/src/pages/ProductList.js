@@ -11,6 +11,14 @@ function ProductList() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const fetchProducts = () => {
     axios
       .get("http://localhost:5000/api/products")
@@ -31,10 +39,20 @@ function ProductList() {
     await axios.delete(`http://localhost:5000/api/products/${id}`);
     fetchProducts();
   };
+
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentProducts = products.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(products.length / itemsPerPage);
+
+  // Responsive container paddings and widths
+  const containerMarginLR = windowWidth > 600 ? "40px" : "10px";
+  const containerMaxWidth = windowWidth > 1000 ? "1000px" : "95%";
+  const headerPaddingLR = windowWidth > 600 ? "40px" : "10px";
+
+  // Button sizes for mobile
+  const buttonPadding = windowWidth > 600 ? "6px 12px" : "10px 16px";
+  const buttonFontSize = windowWidth > 600 ? "1rem" : "1.1rem";
 
   return (
     <div>
@@ -43,22 +61,38 @@ function ProductList() {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          padding: "5px 40px",
+          padding: `5px ${headerPaddingLR}`,
           border: "2px solid blue",
           borderRadius: "15px",
           background: "#570cd7",
           height: "50px",
           marginTop: "20px",
-          marginRight: "40px",
-          marginLeft: "40px",
+          marginRight: containerMarginLR,
+          marginLeft: containerMarginLR,
+          boxSizing: "border-box",
         }}
       >
         <div style={{ flex: 1, textAlign: "center" }}>
-          <h1 style={{ margin: 0, color: "white" }}>Products</h1>
+          <h1
+            style={{
+              margin: 0,
+              color: "white",
+              fontSize: windowWidth > 600 ? "1.8rem" : "1.4rem",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+            }}
+          >
+            Products
+          </h1>
         </div>
         <button
           onClick={() => navigate("/add-product")}
-          style={addButtonStyle}
+          style={{
+            ...addButtonStyle,
+            padding: buttonPadding,
+            fontSize: buttonFontSize,
+          }}
           onMouseOver={(e) => {
             e.target.style.background = "#570cd7";
             e.target.style.color = "#fff";
@@ -79,12 +113,20 @@ function ProductList() {
           marginTop: "16px",
           borderRadius: "8px",
           boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-          maxWidth: "1000px",
+          maxWidth: containerMaxWidth,
           marginLeft: "auto",
           marginRight: "auto",
+          boxSizing: "border-box",
+          overflowX: windowWidth < 600 ? "auto" : "visible", // horizontal scroll on small screens
         }}
       >
-        <table style={{ width: "100%", borderCollapse: "collapse" }}>
+        <table
+          style={{
+            width: "100%",
+            borderCollapse: "collapse",
+            minWidth: windowWidth < 600 ? "600px" : "auto", // force min width on small devices for scroll
+          }}
+        >
           <thead>
             <tr style={{ backgroundColor: "#f2f2f2" }}>
               <th style={thTdStyle}>Name</th>
@@ -111,7 +153,12 @@ function ProductList() {
                 <td style={thTdStyle}>
                   <button
                     onClick={() => navigate(`/edit-product/${prod._id}`)}
-                    style={{ ...actionButtonStyle, marginRight: "8px" }}
+                    style={{
+                      ...actionButtonStyle,
+                      marginRight: windowWidth < 600 ? "4px" : "8px",
+                      padding: buttonPadding,
+                      fontSize: buttonFontSize,
+                    }}
                     onMouseOver={(e) => {
                       e.target.style.background = "#570cd7";
                       e.target.style.color = "#fff";
@@ -125,7 +172,11 @@ function ProductList() {
                   </button>
                   <button
                     onClick={() => deleteProduct(prod._id)}
-                    style={actionButtonStyle}
+                    style={{
+                      ...actionButtonStyle,
+                      padding: buttonPadding,
+                      fontSize: buttonFontSize,
+                    }}
                     onMouseOver={(e) => {
                       e.target.style.background = "#570cd7";
                       e.target.style.color = "#fff";
@@ -142,7 +193,16 @@ function ProductList() {
             ))}
           </tbody>
         </table>
-        <div style={{ marginTop: "20px", textAlign: "center" }}>
+        <div
+          style={{
+            marginTop: "20px",
+            display: "flex",
+            flexWrap: "wrap",
+            justifyContent: "center",
+            gap: windowWidth < 400 ? "6px" : "12px",
+            width: "100%",
+          }}
+        >
           {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
             <button
               key={page}
@@ -152,6 +212,9 @@ function ProductList() {
                 fontWeight: currentPage === page ? "bold" : "normal",
                 backgroundColor: currentPage === page ? "#570cd7" : "white",
                 color: currentPage === page ? "white" : "#570cd7",
+                padding: buttonPadding,
+                fontSize: buttonFontSize,
+                minWidth: "36px",
               }}
             >
               {page}
@@ -162,10 +225,12 @@ function ProductList() {
     </div>
   );
 }
+
 const thTdStyle = {
   border: "1px solid #ddd",
   padding: "12px 16px",
   textAlign: "left",
+  whiteSpace: "nowrap",
 };
 
 const actionButtonStyle = {

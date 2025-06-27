@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
@@ -7,7 +7,14 @@ function Login() {
   const [form, setForm] = useState({ username: "", password: "" });
   const [showPassword, setShowPassword] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -26,6 +33,9 @@ function Login() {
     }
   };
 
+  // Responsive container width
+  const containerWidth = windowWidth > 600 ? "350px" : "90%";
+
   return (
     <div
       style={{
@@ -34,6 +44,8 @@ function Login() {
         backgroundColor: "azure",
         justifyContent: "center",
         alignItems: "center",
+        padding: "20px",
+        boxSizing: "border-box",
       }}
     >
       <div
@@ -43,8 +55,9 @@ function Login() {
           padding: "32px 40px",
           borderRadius: "8px",
           boxShadow: "0 8px 32px rgba(0, 0, 0, 0.2)",
-          minWidth: "350px",
+          width: containerWidth,
           fontFamily: "sans-serif",
+          maxWidth: "450px",
         }}
       >
         <h2 style={{ textAlign: "center", marginBottom: "24px" }}>Login</h2>
