@@ -45,12 +45,10 @@ function ProductList() {
   const currentProducts = products.slice(indexOfFirstItem, indexOfLastItem);
   const totalPages = Math.ceil(products.length / itemsPerPage);
 
-  // Responsive container paddings and widths
   const containerMarginLR = windowWidth > 600 ? "40px" : "10px";
   const containerMaxWidth = windowWidth > 1000 ? "1000px" : "95%";
   const headerPaddingLR = windowWidth > 600 ? "40px" : "10px";
 
-  // Button sizes for mobile
   const buttonPadding = windowWidth > 600 ? "6px 12px" : "10px 16px";
   const buttonFontSize = windowWidth > 600 ? "1rem" : "1.1rem";
 
@@ -117,14 +115,14 @@ function ProductList() {
           marginLeft: "auto",
           marginRight: "auto",
           boxSizing: "border-box",
-          overflowX: windowWidth < 600 ? "auto" : "visible", // horizontal scroll on small screens
+          overflowX: windowWidth < 600 ? "auto" : "visible",
         }}
       >
         <table
           style={{
             width: "100%",
             borderCollapse: "collapse",
-            minWidth: windowWidth < 600 ? "600px" : "auto", // force min width on small devices for scroll
+            minWidth: windowWidth < 600 ? "600px" : "auto",
           }}
         >
           <thead>

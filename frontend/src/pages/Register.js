@@ -42,7 +42,6 @@ function Register() {
     }
   };
 
-  // Responsive container width
   const containerWidth = windowWidth > 600 ? "350px" : "90%";
 
   return (

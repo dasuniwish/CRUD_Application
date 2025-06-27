@@ -9,14 +9,12 @@ function ProductForm() {
   const navigate = useNavigate();
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
-  // Handle responsive layout
   useEffect(() => {
     const handleResize = () => setWindowWidth(window.innerWidth);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Load product data if editing
   useEffect(() => {
     if (id) {
       axios
@@ -53,14 +51,12 @@ function ProductForm() {
     }
   };
 
-  // Layout adjustments for mobile/desktop
   const containerMaxWidth = windowWidth > 480 ? "400px" : "90%";
   const containerMarginTop = windowWidth > 480 ? "120px" : "60px";
   const headerMarginLR = windowWidth > 480 ? "40px" : "10px";
 
   return (
     <>
-      {/* Header */}
       <div
         style={{
           display: "flex",
@@ -119,7 +115,10 @@ function ProductForm() {
           <div style={{ color: "red", marginBottom: "12px" }}>{error}</div>
         )}
 
-        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+        <form
+          onSubmit={handleSubmit}
+          style={{ display: "flex", flexDirection: "column", gap: "10px" }}
+        >
           <label>Name</label>
           <input
             type="text"
@@ -161,7 +160,7 @@ function ProductForm() {
               cursor: "pointer",
               fontWeight: "bold",
               fontSize: windowWidth > 480 ? "1rem" : "0.9rem",
-              marginTop:'10px'
+              marginTop: "10px",
             }}
             onMouseEnter={(e) => {
               e.target.style.background = "#570cd7";
