@@ -28,8 +28,13 @@ function ProductForm() {
     e.preventDefault();
     setError("");
 
-    if (!form.name || !form.price || !form.quantity) {
+    if (!form.name || form.price === "" || form.quantity === "") {
       setError("All fields are required.");
+      return;
+    }
+
+    if (Number(form.price) < 0 || Number(form.quantity) < 0) {
+      setError("Price and Quantity must be zero or greater.");
       return;
     }
 
@@ -133,6 +138,7 @@ function ProductForm() {
           <input
             type="number"
             placeholder="Price"
+            min="0"
             value={form.price}
             onChange={(e) => setForm({ ...form, price: e.target.value })}
             required
@@ -143,6 +149,7 @@ function ProductForm() {
           <input
             type="number"
             placeholder="Quantity"
+            min="0"
             value={form.quantity}
             onChange={(e) => setForm({ ...form, quantity: e.target.value })}
             required
