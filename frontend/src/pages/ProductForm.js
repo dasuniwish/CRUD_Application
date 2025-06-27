@@ -4,43 +4,63 @@ import { useNavigate, useParams } from "react-router-dom";
 
 function ProductForm() {
   const [form, setForm] = useState({ name: "", price: "", quantity: "" });
+  const [error, setError] = useState("");
   const { id } = useParams();
   const navigate = useNavigate();
-
   const [windowWidth, setWindowWidth] = useState(window.innerWidth);
 
+  // Handle responsive layout
   useEffect(() => {
-    // Resize handler to update windowWidth
     const handleResize = () => setWindowWidth(window.innerWidth);
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
+  // Load product data if editing
   useEffect(() => {
     if (id) {
       axios
         .get(`http://localhost:5000/api/products/${id}`)
-        .then((res) => setForm(res.data));
+        .then((res) => setForm(res.data))
+        .catch(() => setError("Failed to load product"));
     }
   }, [id]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (id) {
-      await axios.put(`http://localhost:5000/api/products/${id}`, form);
-    } else {
-      await axios.post("http://localhost:5000/api/products", form);
+    setError("");
+
+    if (!form.name || !form.price || !form.quantity) {
+      setError("All fields are required.");
+      return;
     }
-    navigate("/products");
+
+    const payload = {
+      name: form.name.trim(),
+      price: Number(form.price),
+      quantity: Number(form.quantity),
+    };
+
+    try {
+      if (id) {
+        await axios.put(`http://localhost:5000/api/products/${id}`, payload);
+      } else {
+        await axios.post("http://localhost:5000/api/products", payload);
+      }
+      navigate("/products");
+    } catch (err) {
+      setError(err.response?.data?.error || "Submission failed");
+    }
   };
 
-  // Responsive widths and margins
+  // Layout adjustments for mobile/desktop
   const containerMaxWidth = windowWidth > 480 ? "400px" : "90%";
-  const containerMarginTop = windowWidth > 480 ? "140px" : "60px";
+  const containerMarginTop = windowWidth > 480 ? "120px" : "60px";
   const headerMarginLR = windowWidth > 480 ? "40px" : "10px";
 
   return (
     <>
+      {/* Header */}
       <div
         style={{
           display: "flex",
@@ -50,11 +70,10 @@ function ProductForm() {
           border: "2px solid blue",
           borderRadius: "15px",
           background: "#570cd7",
-          height: "50px",
+          height: "70px",
           marginTop: "20px",
           marginRight: headerMarginLR,
           marginLeft: headerMarginLR,
-          boxSizing: "border-box",
         }}
       >
         <div style={{ flex: 1, textAlign: "center" }}>
@@ -65,7 +84,7 @@ function ProductForm() {
               fontSize: windowWidth > 480 ? "1.8rem" : "1.3rem",
             }}
           >
-            {id ? "Edit Product" : "Add Products"}
+            {id ? "Edit Product" : "Add Product"}
           </h1>
         </div>
         <button
@@ -80,18 +99,11 @@ function ProductForm() {
             fontWeight: "bold",
             fontSize: windowWidth > 480 ? "1rem" : "0.8rem",
           }}
-          onMouseOver={(e) => {
-            e.target.style.background = "#570cd7";
-            e.target.style.color = "#fff";
-          }}
-          onMouseOut={(e) => {
-            e.target.style.background = "white";
-            e.target.style.color = "#570cd7";
-          }}
         >
           Back
         </button>
       </div>
+
       <div
         style={{
           maxWidth: containerMaxWidth,
@@ -101,54 +113,41 @@ function ProductForm() {
           borderRadius: "10px",
           boxShadow: "0 4px 8px rgba(0,0,0,0.1)",
           backgroundColor: "#999696",
-          boxSizing: "border-box",
         }}
       >
-        <form
-          onSubmit={handleSubmit}
-          style={{ display: "flex", flexDirection: "column", gap: "10px" }}
-        >
-          <h2
-            style={{
-              textAlign: "center",
-              fontSize: windowWidth > 480 ? "1.5rem" : "1.2rem",
-            }}
-          >
-            {id ? "Edit" : "Add"} Product
-          </h2>
+        {error && (
+          <div style={{ color: "red", marginBottom: "12px" }}>{error}</div>
+        )}
 
+        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+          <label>Name</label>
           <input
+            type="text"
             placeholder="Name"
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
-            style={{
-              padding: "8px",
-              borderRadius: "5px",
-              border: "1px solid #ccc",
-              fontSize: windowWidth > 480 ? "1rem" : "0.9rem",
-            }}
+            required
+            style={inputStyle(windowWidth)}
           />
+
+          <label>Price</label>
           <input
+            type="number"
             placeholder="Price"
             value={form.price}
             onChange={(e) => setForm({ ...form, price: e.target.value })}
-            style={{
-              padding: "8px",
-              borderRadius: "5px",
-              border: "1px solid #ccc",
-              fontSize: windowWidth > 480 ? "1rem" : "0.9rem",
-            }}
+            required
+            style={inputStyle(windowWidth)}
           />
+
+          <label>Quantity</label>
           <input
+            type="number"
             placeholder="Quantity"
             value={form.quantity}
             onChange={(e) => setForm({ ...form, quantity: e.target.value })}
-            style={{
-              padding: "8px",
-              borderRadius: "5px",
-              border: "1px solid #ccc",
-              fontSize: windowWidth > 480 ? "1rem" : "0.9rem",
-            }}
+            required
+            style={inputStyle(windowWidth)}
           />
 
           <button
@@ -162,13 +161,13 @@ function ProductForm() {
               cursor: "pointer",
               fontWeight: "bold",
               fontSize: windowWidth > 480 ? "1rem" : "0.9rem",
-              transition: "background 0.2s",
+              marginTop:'10px'
             }}
-            onMouseOver={(e) => {
+            onMouseEnter={(e) => {
               e.target.style.background = "#570cd7";
               e.target.style.color = "#fff";
             }}
-            onMouseOut={(e) => {
+            onMouseLeave={(e) => {
               e.target.style.background = "white";
               e.target.style.color = "#570cd7";
             }}
@@ -179,6 +178,15 @@ function ProductForm() {
       </div>
     </>
   );
+}
+
+function inputStyle(windowWidth) {
+  return {
+    padding: "8px",
+    borderRadius: "5px",
+    border: "1px solid #ccc",
+    fontSize: windowWidth > 480 ? "1rem" : "0.9rem",
+  };
 }
 
 export default ProductForm;
